@@ -1,0 +1,86 @@
+Part 1 — AWS EC2 Setup for Docker Learning
+
+You first created an AWS IAM Admin user, then created an IAM role for EC2 with SSM access. After that:
+
+Created an EC2 instance.
+Attached the IAM role to the EC2 instance.
+Connected to the EC2 instance using SSH.
+Started running Linux commands.
+First commands
+
+1. sudo su
+
+sudo = run a command with administrator/root privileges.
+su = switch user.
+sudo su therefore switches you to the root user.
+
+You will usually see the prompt change from something like:
+
+[ec2-user@ip-xxx ~]$
+
+to:
+
+[root@ip-xxx ~]#
+
+The # indicates that you are operating as root.
+
+Important: As root, you have very high privileges, so commands should be run carefully.
+
+2. cd /
+
+This is the command you were asking about.
+
+cd = Change Directory
+/ = the root directory of the Linux filesystem.
+
+So:
+
+cd /
+
+means:
+
+Go to the root directory of the Linux filesystem.
+
+Think of / as the top-level folder of Linux.
+
+For example:
+
+/
+├── bin
+├── boot
+├── dev
+├── etc
+├── home
+├── opt
+├── tmp
+├── usr
+└── var
+
+You can check where you currently are with:
+
+pwd
+
+pwd = Print Working Directory
+
+Example:
+
+[root@ip-xxx ~]# pwd
+/root
+
+After:
+
+cd /
+
+you would get:
+
+[root@ip-xxx /]# pwd
+/
+Quick memory trick
+Command	Meaning
+sudo	Run with elevated/admin privileges
+su	Switch user
+sudo su	Become root user
+cd	Change directory
+cd /	Go to Linux root directory
+pwd	Show current directory
+ls	List files/directories
