@@ -1,0 +1,301 @@
+# Docker Learning Journey
+
+## Part 1 — Setting Up an AWS EC2 Instance
+
+Before starting Docker, I prepared an AWS EC2 environment.
+
+### 1. AWS IAM Setup
+
+I first created an AWS administrator user.
+
+Then I created an IAM role for the EC2 instance with permissions required for **AWS Systems Manager (SSM)**.
+
+### 2. EC2 Instance
+
+I created an EC2 instance and attached the IAM role to it.
+
+The EC2 instance is being used as my **Docker Host**.
+
+### 3. Connecting to EC2
+
+I connected to the EC2 instance using **AWS Systems Manager Session Manager (SSM)**.
+
+The session showed:
+
+```bash
+ssm-user
+```
+
+I checked the current user using:
+
+```bash
+whoami
+```
+
+Output:
+
+```bash
+ssm-user
+```
+
+### 4. Switching to Root User
+
+I used:
+
+```bash
+sudo su
+```
+
+Meaning:
+
+* `sudo` → execute a command with elevated privileges
+* `su` → switch user
+* `sudo su` → switch to the root user
+
+I verified it with:
+
+```bash
+whoami
+```
+
+Output:
+
+```bash
+root
+```
+
+Now I was working as the **root user**.
+
+> ⚠️ Root has full administrative privileges, so commands should be used carefully.
+
+---
+
+## 5. Understanding the Linux Prompt
+
+My prompt was:
+
+```bash
+root@ip-172-31-6-34:/var/snap/amazon-ssm-agent/13009#
+```
+
+It tells me:
+
+* `root` → current user
+* `ip-172-31-6-34` → hostname/private IP-based hostname of the EC2 instance
+* `/var/snap/amazon-ssm-agent/13009` → current working directory
+* `#` → I am operating as root
+
+---
+
+## 6. `ls` Command
+
+I used:
+
+```bash
+ls
+```
+
+`ls` means **list**.
+
+It displays the files and directories inside the current directory.
+
+---
+
+## 7. `cd` Command
+
+`cd` means:
+
+**Change Directory**
+
+For example:
+
+```bash
+cd /
+```
+
+means:
+
+> Go to the root directory of the Linux filesystem.
+
+The Linux root directory is represented by:
+
+```bash
+/
+```
+
+Example:
+
+```bash
+root@server:/var/snap/amazon-ssm-agent/13009# cd /
+root@server:/#
+```
+
+The prompt changes because the current directory is now `/`.
+
+---
+
+## 8. Important Mistake — `CD /`
+
+I initially tried:
+
+```bash
+CD /
+```
+
+and received:
+
+```text
+CD: command not found
+```
+
+### Reason
+
+Linux commands are **case-sensitive**.
+
+Therefore:
+
+```bash
+cd
+```
+
+and:
+
+```bash
+CD
+```
+
+are different.
+
+Correct:
+
+```bash
+cd /
+```
+
+Incorrect:
+
+```bash
+CD /
+```
+
+---
+
+## 9. `/` vs `\`
+
+This is an important Linux concept.
+
+### `/`
+
+```bash
+/
+```
+
+represents the **root directory**.
+
+Correct:
+
+```bash
+cd /
+```
+
+### `\`
+
+```bash
+\
+```
+
+has a different meaning in the Linux shell. It is commonly used as an **escape character** and can also be used to continue a command onto the next line.
+
+Therefore, don't use:
+
+```bash
+cd \
+```
+
+when you want to go to the Linux root directory.
+
+### Easy memory trick
+
+```text
+/  → Linux path/root
+\  → escape character
+```
+
+---
+
+## 10. `pwd` — Check Current Directory
+
+A very useful command to learn now is:
+
+```bash
+pwd
+```
+
+`pwd` = **Print Working Directory**
+
+It tells me exactly where I am.
+
+Example:
+
+```bash
+root@server:/# pwd
+/
+```
+
+If I am in:
+
+```bash
+/var/snap/amazon-ssm-agent/13009
+```
+
+then:
+
+```bash
+pwd
+```
+
+will show:
+
+```bash
+/var/snap/amazon-ssm-agent/13009
+```
+
+---
+
+# Commands Learned So Far
+
+| Command   | Meaning                          |
+| --------- | -------------------------------- |
+| `ls`      | List files/directories           |
+| `whoami`  | Show current user                |
+| `sudo`    | Execute with elevated privileges |
+| `sudo su` | Switch to root user              |
+| `cd`      | Change directory                 |
+| `cd /`    | Go to Linux root directory       |
+| `pwd`     | Show current working directory   |
+
+## Current Progress
+
+```text
+AWS Account
+    ↓
+IAM Admin User
+    ↓
+IAM Role for EC2 / SSM
+    ↓
+EC2 Instance
+    ↓
+Attach IAM Role
+    ↓
+SSM Session
+    ↓
+ssm-user
+    ↓
+sudo su
+    ↓
+root
+    ↓
+Linux Commands
+    ↓
+Next: Docker Installation & Configuration
+```
