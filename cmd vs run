@@ -1,0 +1,81 @@
+1. RUN → Build Time
+
+RUN commands are executed when the Docker image is being built.
+
+Example:
+
+FROM ubuntu
+
+RUN apt update
+RUN apt install -y nginx
+
+When you run:
+
+docker build -t myimage .
+
+Docker executes the RUN commands and saves their results into image layers.
+
+Think:
+
+RUN = Prepare the image
+
+Common uses:
+
+Install packages
+Install applications
+Copy/configure dependencies
+Execute setup commands
+2. CMD → Runtime
+
+CMD specifies the default command that runs when a container starts.
+
+Example:
+
+FROM ubuntu
+
+RUN apt update
+RUN apt install -y nginx
+
+CMD ["nginx", "-g", "daemon off;"]
+
+Here:
+
+RUN apt install -y nginx
+
+➡️ happens while building the image.
+
+Then:
+
+CMD ["nginx", "-g", "daemon off;"]
+
+➡️ happens when the container starts.
+
+Easy way to remember 🧠
+RUN → BUILD TIME → Creates/updates image
+CMD → RUN TIME   → Starts the application/container
+Real-life example
+
+Imagine you're preparing a house:
+
+RUN
+ ↓
+Install doors
+Install windows
+Install electricity
+Install furniture
+ ↓
+IMAGE READY
+
+Then:
+
+CMD
+ ↓
+"Start living in the house"
+ ↓
+CONTAINER RUNNING
+Important distinction
+RUN	CMD
+Build time	Runtime
+Creates image layers	Provides default startup command
+Used to install/configure	Used to start application
+Executes during docker build	Executes when container starts
