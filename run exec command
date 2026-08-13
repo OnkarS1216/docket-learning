@@ -1,0 +1,152 @@
+docker exec → go inside an existing container
+docker run → create a new container and go inside it
+1. docker exec -it elastic_borg bash
+docker exec -it elastic_borg bash
+
+Let's break it down:
+
+Part	Meaning
+docker	Docker command
+exec	Execute a command inside an already running container
+-i	Interactive — keeps input open
+-t	Gives you a terminal
+elastic_borg	Name of the existing container
+bash	Opens the Bash shell inside the container
+What happens?
+
+You already had this container:
+
+elastic_borg
+     ↓
+   nginx
+     ↓
+  RUNNING
+
+When you execute:
+
+docker exec -it elastic_borg bash
+
+Docker takes you inside that existing container.
+
+You may see:
+
+root@ac81d1d689ff:/#
+
+Now commands such as:
+
+ls
+pwd
+cd /etc
+
+are being executed inside elastic_borg.
+
+If you type:
+
+exit
+
+you leave the container, but the container itself continues running.
+
+2. docker run -it --name cont2 nginx bash
+docker run -it --name cont2 nginx bash
+
+This is different.
+
+Breakdown
+Part	Meaning
+docker	Docker command
+run	Create and start a new container
+-i	Interactive
+-t	Terminal
+--name cont2	Give the new container the name cont2
+nginx	Use the Nginx image
+bash	Run Bash inside the new container
+What happens?
+
+Docker does approximately this:
+
+nginx IMAGE
+     ↓
+CREATE
+     ↓
+cont2 CONTAINER
+     ↓
+START
+     ↓
+BASH SHELL
+
+So:
+
+docker run -it --name cont2 nginx bash
+
+creates a brand-new container called cont2.
+
+Then it immediately puts you inside that container.
+
+You will see something like:
+
+root@a0218a76...:/#
+⭐ Most important difference
+
+Think about it like this:
+
+docker exec
+EXISTING CONTAINER
+       ↓
+   docker exec
+       ↓
+ENTER CONTAINER
+
+Example:
+
+docker exec -it elastic_borg bash
+
+No new container is created.
+
+docker run
+DOCKER IMAGE
+     ↓
+docker run
+     ↓
+NEW CONTAINER
+     ↓
+ENTER CONTAINER
+
+Example:
+
+docker run -it --name cont2 nginx bash
+
+A new container is created.
+
+Easy real-life example 🧠
+
+Imagine elastic_borg is an existing house.
+
+docker exec
+
+You already have the house:
+
+🏠 elastic_borg
+
+You use:
+
+docker exec -it elastic_borg bash
+
+➡️ You enter the existing house.
+
+docker run
+
+You have a house blueprint (nginx image):
+
+📋 nginx image
+
+You use:
+
+docker run -it --name cont2 nginx bash
+
+➡️ Docker builds/creates a new house called cont2 and puts you inside.
+
+Remember this for Docker:
+
+run = Create + Start + optionally enter a NEW container
+
+exec = Execute/enter something inside an EXISTING running container
