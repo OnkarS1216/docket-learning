@@ -1,0 +1,166 @@
+1. Basic docker build
+docker build -t myapp .
+
+Break it down:
+
+docker build    → Build a Docker image
+-t myapp        → Give the image the name/tag "myapp"
+.               → Use the current directory as the build context
+
+So if your directory looks like:
+
+myapp/
+├── Dockerfile
+├── app.py
+└── requirements.txt
+
+and you are inside myapp/, run:
+
+docker build -t myapp .
+
+Docker uses the current directory (.) as the build context.
+
+🧠 Remember
+
+. means current directory.
+
+2. What is Build Context?
+
+The build context is the directory that Docker can access when building the image.
+
+For example:
+
+/home/ubuntu/myapp/
+│
+├── Dockerfile
+├── app.py
+├── requirements.txt
+└── index.html
+
+If you run:
+
+docker build -t myapp .
+
+then:
+
+.  → /home/ubuntu/myapp/
+
+That entire directory becomes the build context.
+
+This is important because commands such as:
+
+COPY app.py /app/
+
+can copy files from the build context into the image.
+
+3. Different Dockerfile name
+
+The second slide shows:
+
+docker build -f files/test.txt -t image3 /imagefiles
+
+Here we are using two different things:
+
+-f files/test.txt
+
+This tells Docker:
+
+"Use files/test.txt as the Dockerfile."
+
+Normally Docker expects a file called:
+
+Dockerfile
+
+But with -f, you can specify another filename.
+
+For example:
+
+docker build -f MyDockerfile -t myapp .
+
+means:
+
+MyDockerfile → Dockerfile to use
+.             → Build context
+4. The last argument is VERY important
+
+In:
+
+docker build -f files/test.txt -t image3 /imagefiles
+
+the parts are:
+
+docker build
+      ↓
+-f files/test.txt
+      ↓
+Dockerfile location
+
+-t image3
+      ↓
+Image name
+
+/imagefiles
+      ↓
+BUILD CONTEXT
+
+So:
+
+Dockerfile = files/test.txt
+
+Build context = /imagefiles
+⚠️ Important
+
+-f tells Docker which Dockerfile to use.
+
+The final path tells Docker which directory is the build context.
+
+They are not the same thing.
+
+5. Example from the slide
+
+The slide gives:
+
+docker build -f /home/ubuntu/apps/imagefiles/test.txt -t image3 /home/ubuntu/build/contextfiles/app1
+
+Meaning:
+
+Part	Meaning
+docker build	Build image
+-f	Specify Dockerfile
+/home/ubuntu/apps/imagefiles/test.txt	Dockerfile location
+-t image3	Image name = image3
+/home/ubuntu/build/contextfiles/app1	Build context
+
+So Docker uses:
+
+Dockerfile
+/home/ubuntu/apps/imagefiles/test.txt
+
+but the build context is:
+
+/home/ubuntu/build/contextfiles/app1
+⭐ Most important concept
+
+Think of it this way:
+
+docker build -f <DOCKERFILE> -t <IMAGE_NAME> <BUILD_CONTEXT>
+
+For example:
+
+docker build -f mydockerfile -t myapp .
+             Dockerfile
+                  ↓
+docker build -f mydockerfile -t myapp .
+                                  ↑
+                           Build context
+Memorize this:
+
+-f → Which Dockerfile?
+-t → What image name?
+Last path → Which build context?
+
+And the most common command you'll use is:
+
+docker build -t myapp .
+
+. = current directory = build context.
