@@ -1,0 +1,297 @@
+🐳 COPY म्हणजे काय?
+
+Dockerfile मधील:
+
+COPY <src> <dest>
+
+याचा अर्थ:
+
+Host वरील Build Context मधून files/folders घेऊन Docker image/container च्या filesystem मध्ये copy करणे.
+
+सोप्या भाषेत:
+
+Host Project
+     ↓
+   COPY
+     ↓
+Docker Image
+     ↓
+Container
+1. Image मधील Project Structure समजून घ्या
+
+तुमच्या image मध्ये Host वर structure आहे:
+
+project/
+│
+├── Dockerfile
+│
+└── app/
+    ├── main.py
+    │
+    └── utils/
+        └── helper.py
+
+इथे project/ हा build context आहे.
+
+उदा. तुम्ही:
+
+docker build -t myapp .
+
+केले, तर शेवटचा . म्हणजे:
+
+Current directory हा Docker build context आहे.
+
+2. पहिला COPY command
+
+Image मध्ये:
+
+COPY app/utils /app/code/utils
+
+हे पाहू:
+
+COPY
+ │
+ ├── Source
+ │      ↓
+ │   app/utils
+ │
+ └── Destination
+        ↓
+     /app/code/utils
+
+म्हणजे Host वर:
+
+app/
+└── utils/
+    └── helper.py
+
+हे Docker image मध्ये copy होईल:
+
+/app/
+└── code/
+    └── utils/
+        └── helper.py
+म्हणजे:
+HOST                         IMAGE
+
+
+app/utils/       ─────→      /app/code/utils/
+    │                            │
+    └── helper.py                └── helper.py
+3. दुसरा COPY command
+
+Image मध्ये:
+
+COPY app/main.py /app/code/
+
+याचा अर्थ:
+
+app/main.py ही फक्त एक file /app/code/ मध्ये copy करा.
+
+Result:
+
+/app/
+└── code/
+    ├── main.py
+    │
+    └── utils/
+        └── helper.py
+4. src आणि dest लक्षात ठेवा ⭐
+
+Syntax:
+
+COPY <src> <dest>
+src = Source
+
+कुठून copy करायचे?
+
+dest = Destination
+
+कुठे copy करायचे?
+
+उदाहरण:
+
+COPY app/main.py /app/code/
+
+इथे:
+
+src  = app/main.py
+dest = /app/code/
+5. COPY कोणाकडून कोणाकडे?
+
+हा सर्वात important concept आहे.
+
+HOST / BUILD CONTEXT
+        │
+        │ COPY
+        ↓
+   DOCKER IMAGE
+        │
+        ↓
+    CONTAINER
+
+उदाहरण:
+
+COPY app/main.py /app/code/
+
+याचा अर्थ:
+
+तुमच्या computer वरील
+app/main.py
+
+
+        ↓
+
+
+Docker image मधील
+/app/code/main.py
+6. Build Context म्हणजे काय?
+
+समजा तुमची directory:
+
+myproject/
+├── Dockerfile
+├── app/
+│   ├── main.py
+│   └── utils/
+│       └── helper.py
+└── README.md
+
+तुम्ही:
+
+docker build -t myapp .
+
+चालवले.
+
+इथे:
+
+.
+
+म्हणजे:
+
+myproject/
+
+हा build context.
+
+त्यामुळे तुम्ही Dockerfile मध्ये:
+
+COPY app/main.py /app/code/
+
+करू शकता.
+
+पण:
+
+COPY ../something.txt /app/code/
+
+असे generally करू शकत नाही, कारण ../something.txt build context च्या बाहेर आहे.
+
+7. Image मधील statement का important आहे?
+
+Image मध्ये लिहिले आहे:
+
+It can copy files from the build context only
+
+याचा अर्थ:
+
+Build Context
+      │
+      ├── app/
+      ├── Dockerfile
+      └── files
+          ↓
+        COPY
+
+पण context च्या बाहेरची file:
+
+Parent Directory
+      ↑
+      │
+      X
+Docker Build Context
+
+COPY करू शकत नाही.
+
+8. COPY app/utils आणि COPY app/main.py मधील फरक
+Directory copy:
+COPY app/utils /app/code/utils
+
+पूर्ण utils directory copy होते.
+
+utils/
+└── helper.py
+File copy:
+COPY app/main.py /app/code/
+
+फक्त:
+
+main.py
+
+copy होते.
+
+9. Final Result
+
+दोन्ही commands execute केल्यानंतर Docker image मध्ये:
+
+/app/
+└── code/
+    │
+    ├── main.py
+    │
+    └── utils/
+        │
+        └── helper.py
+
+असे structure तयार होईल.
+
+10. एक Real-Life Example 🧳
+
+समजा तुमच्याकडे एक suitcase आहे.
+
+HOST
+┌───────────────────┐
+│ main.py            │
+│ utils/             │
+│ README             │
+└───────────────────┘
+
+Dockerfile मधील:
+
+COPY app/main.py /app/code/
+
+म्हणजे:
+
+"फक्त main.py suitcase मध्ये टाका."
+
+आणि:
+
+COPY app/utils /app/code/utils
+
+म्हणजे:
+
+"utils चा पूर्ण folder suitcase मध्ये टाका."
+
+⭐ Exam/Interview साठी लक्षात ठेवा
+COPY <src> <dest>
+
+src → Build context मधील source
+
+dest → Docker image/container filesystem मधील destination
+
+आणि सर्वात important:
+
+COPY build context मधून files/directories Docker image मध्ये copy करते. src हा build context च्या बाहेरचा path नसावा.
+
+तुमच्या image चे दोन commands:
+COPY app/utils /app/code/utils
+
+➡️ पूर्ण utils folder copy.
+
+COPY app/main.py /app/code/
+
+➡️ फक्त main.py copy.
+
+Final shortcut:
+
+COPY = "Host/Build Context मधून → Docker Image मध्ये"
+
+हे ADD पेक्षा वेगळे आहे; Docker मध्ये COPY हा साधा आणि preferred file-copy instruction मानला जातो.
