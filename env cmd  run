@@ -1,0 +1,562 @@
+Yes — very commonly in corporate applications, environment variables are used for IP addresses, ports, database hosts, URLs, credentials, API keys, and other configuration.
+
+For example, instead of hardcoding:
+
+DB_HOST=10.0.2.15
+DB_PORT=3306
+APP_PORT=8080
+
+you can put them in Docker environment variables:
+
+ENV DB_HOST=10.0.2.15
+ENV DB_PORT=3306
+ENV APP_PORT=8080
+
+Then your application reads those values.
+
+Why do companies use ENV?
+
+Because the same application can run in different environments.
+
+For example:
+
+Development
+DB_HOST=10.0.1.10
+
+
+Testing
+DB_HOST=10.0.2.10
+
+
+Production
+DB_HOST=10.0.3.10
+
+You don't need to change your application code — you just change the configuration.
+
+Docker example
+
+Suppose you have:
+
+Frontend container
+       ↓
+Backend container
+       ↓
+MySQL container
+
+You might configure:
+
+DB_HOST=mysql
+DB_PORT=3306
+BACKEND_PORT=8080
+
+Notice something important:
+
+ENV does not itself open or expose a port.
+
+For example:
+
+ENV APP_PORT=8080
+
+only creates a variable called APP_PORT.
+
+To actually publish a container port to the host, you use:
+
+docker run -p 8080:8080 myapp
+
+So remember:
+
+ENV       → configuration/value
+EXPOSE    → documents the container port
+-p        → actually publishes/maps the port
+
+And in corporate projects, you'll often see environment variables such as:
+
+DB_HOST
+DB_PORT
+DB_NAME
+API_URL
+REDIS_HOST
+REDIS_PORT
+APP_PORT
+
+This is a very important Docker + DevOps concept to understand.
+
+Yes. This screenshot is showing the most important practical use of ENV in Docker: setting default values and overriding them when the container starts.
+
+1. Dockerfile sets default values
+
+The Dockerfile contains:
+
+FROM alpine
+
+
+RUN apk add --no-cache iputils curl
+
+
+ENV action=ping
+ENV target=8.8.8.8
+
+
+CMD ["sh", "-c", "exec $action $target"]
+
+Here:
+
+action = ping
+target = 8.8.8.8
+
+These are the default values.
+
+So, normally:
+
+docker run myimage
+
+will effectively execute:
+
+ping 8.8.8.8
+2. What does CMD ["sh", "-c", ...] mean?
+
+This part is important:
+
+CMD ["sh", "-c", "exec $action $target"]
+sh
+
+Starts a shell inside the container.
+
+-c
+
+Tells the shell:
+
+"Execute the command written in the next string."
+
+$action
+
+Gets the value of the action environment variable.
+
+$target
+
+Gets the value of the target environment variable.
+
+Therefore:
+
+$action → ping
+$target → 8.8.8.8
+
+becomes:
+
+exec ping 8.8.8.8
+3. Now the important part: overriding at runtime
+
+The image is built:
+
+docker build -t myimage .
+
+But when starting the container, we can change the environment variables:
+
+docker run -e action=curl -e target=10.10.1.1 myimage
+
+Here:
+
+-e action=curl
+
+changes:
+
+action = ping
+
+to:
+
+action = curl
+
+And:
+
+-e target=10.10.1.1
+
+changes:
+
+target = 8.8.8.8
+
+to:
+
+target = 10.10.1.1
+
+So the container executes:
+
+curl 10.10.1.1
+4. Very easy analogy
+
+Think of your Dockerfile as a default configuration:
+
+action = ping
+target = 8.8.8.8
+
+But at runtime, your company/team can say:
+
+"For this particular container, use curl and a different server."
+
+So:
+
+docker run -e action=curl -e target=10.10.1.1 myimage
+
+means:
+
+Default:
+action = ping
+target = 8.8.8.8
+
+
+Runtime override:
+action = curl
+target = 10.10.1.1
+
+The runtime values win.
+
+5. This is exactly where IP addresses and ports are used
+
+Your previous question was whether corporate projects use ENV for IP addresses and ports.
+
+Yes.
+
+For example, a real application might have:
+
+ENV DB_HOST=10.0.1.25
+ENV DB_PORT=3306
+ENV APP_PORT=8080
+
+Then in production you might run:
+
+docker run \
+-e DB_HOST=10.0.2.50 \
+-e DB_PORT=3306 \
+-e APP_PORT=9090 \
+myapp
+
+You don't have to rebuild the Docker image just because the database IP or application configuration changed.
+
+That's one major reason environment variables are useful in DevOps and corporate deployments.
+
+6. But remember this important difference
+
+ENV does not publish a port.
+
+For example:
+
+ENV APP_PORT=8080
+
+means:
+
+"The application should use/store 8080 as a configuration value."
+
+It does not mean:
+
+"Open port 8080 to the outside world."
+
+Port publishing is done with:
+
+docker run -p 8080:8080 myimage
+
+So:
+
+ENV
+ ↓
+Configuration
+
+
+EXPOSE
+ ↓
+Documents intended container port
+
+
+-p
+ ↓
+Actually maps host port → container port
+One-line exam/interview answer
+
+ENV sets default environment variables in a Docker image, and these values can be overridden at container runtime using docker run -e.
+
+explain in each in simlple manner
+
+Absolutely. Let’s understand every line in this Dockerfile in a very simple way.
+
+Your screenshot contains:
+
+FROM ubuntu
+
+
+WORKDIR /app
+
+
+RUN echo "This is the /app directory" > app.txt
+
+
+WORKDIR /app/code
+
+
+RUN echo "This is the /app/code directory" > app-code.txt
+
+
+CMD ["ls"]
+1. FROM ubuntu
+FROM ubuntu
+
+This tells Docker:
+
+Start my image using Ubuntu as the base image.
+
+Think:
+
+Docker Image
+     ↓
+Ubuntu
+     ↓
+My application
+
+Without FROM, Docker doesn't know which base image to start from.
+
+2. WORKDIR /app
+WORKDIR /app
+
+This sets the current working directory inside the container to:
+
+/app
+
+Think of it like Linux:
+
+cd /app
+
+After this line, Docker is basically working inside:
+
+/app
+Important
+
+WORKDIR also creates the directory if it doesn't already exist.
+
+So:
+
+WORKDIR /app
+
+means:
+
+Create /app if necessary and make /app the current directory.
+
+3. RUN echo "This is the /app directory" > app.txt
+RUN echo "This is the /app directory" > app.txt
+
+This command runs while the Docker image is being built.
+
+Because the previous command was:
+
+WORKDIR /app
+
+the file will be created here:
+
+/app/app.txt
+Breaking it down
+echo "This is the /app directory"
+
+prints:
+
+This is the /app directory
+
+Then:
+
+>
+
+means:
+
+Put the output into a file.
+
+So:
+
+app.txt
+
+is created.
+
+Result:
+
+/app
+└── app.txt
+4. WORKDIR /app/code
+WORKDIR /app/code
+
+Now Docker changes the working directory.
+
+Previously:
+
+/app
+
+Now:
+
+/app/code
+
+Think of:
+
+cd /app/code
+
+Again, Docker creates /app/code if necessary.
+
+Now the structure is:
+
+/app
+└── code
+5. RUN echo "This is the /app/code directory" > app-code.txt
+RUN echo "This is the /app/code directory" > app-code.txt
+
+Because the current working directory is now:
+
+/app/code
+
+the file is created here:
+
+/app/code/app-code.txt
+
+So now the structure becomes:
+
+/app
+├── app.txt
+└── code
+    └── app-code.txt
+6. CMD ["ls"]
+CMD ["ls"]
+
+This is the command that runs when the container starts.
+
+It means:
+
+Run ls when the container starts.
+
+ls means:
+
+Show the files and directories in the current directory.
+
+And what is the current directory?
+
+Because the last WORKDIR was:
+
+WORKDIR /app/code
+
+the current directory is:
+
+/app/code
+
+So:
+
+ls
+
+will show:
+
+app-code.txt
+Very important difference: RUN vs CMD
+
+This is one of the most important Docker concepts.
+
+RUN
+RUN echo "Hello" > test.txt
+
+Runs during image building.
+
+docker build
+     ↓
+RUN executes
+     ↓
+Image is created
+CMD
+CMD ["ls"]
+
+Runs when you start the container.
+
+docker run
+     ↓
+CMD executes
+Easy memory trick
+RUN → Build time
+CMD → Container start time
+Complete flow of your Dockerfile
+
+Think of Docker doing this step by step:
+
+FROM ubuntu
+     ↓
+Start Ubuntu
+     ↓
+WORKDIR /app
+     ↓
+Move to /app
+     ↓
+Create app.txt
+     ↓
+WORKDIR /app/code
+     ↓
+Move to /app/code
+     ↓
+Create app-code.txt
+     ↓
+Build image
+     ↓
+docker run
+     ↓
+CMD ["ls"]
+     ↓
+ls /app/code
+     ↓
+Output: app-code.txt
+Why don't we see app.txt when ls runs?
+
+This is a very good question.
+
+Because ls is running in:
+
+/app/code
+
+not:
+
+/app
+
+So:
+
+ls
+
+shows:
+
+app-code.txt
+
+To see app.txt, you could use:
+
+ls /app
+
+or:
+
+cd /app
+ls
+
+Then you'll see:
+
+app.txt
+code
+Final folder structure
+
+After building the image:
+
+/
+└── app
+    ├── app.txt
+    └── code
+        └── app-code.txt
+
+And the default working directory of the container is:
+
+/app/code
+
+because that was the last WORKDIR.
+
+One-line meaning of each command
+Docker instruction	Simple meaning
+FROM ubuntu	Start with Ubuntu
+WORKDIR /app	Go to /app
+RUN ...	Execute command while building image
+WORKDIR /app/code	Go to /app/code
+CMD ["ls"]	Run ls when container starts
+Most important thing to remember
+WORKDIR = Where am I?
+RUN     = Do something while building
+CMD     = What should happen when container starts?
+
+This WORKDIR concept is especially important because every relative file path in later RUN, COPY, ADD, etc. can depend on the current working directory.
